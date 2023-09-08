@@ -1,11 +1,10 @@
 /* global Handlebars, utils, dataSource */ // eslint-disable-line no-unused-vars
-
 {
   'use strict';
 
-const select = {
-  templateOf: {
-    menuProduct: "#template-menu-product",
+  const select = {
+    templateOf: {
+      menuProduct: "#template-menu-product",
     },
     containerOf: {
       menu: '#product-list',
@@ -51,27 +50,57 @@ const select = {
   const templates = {
     menuProduct: Handlebars.compile(document.querySelector(select.templateOf.menuProduct).innerHTML),
   };
-  class Product{
-    constructor(){
+
+  class Product {
+    constructor(id, data) {
       const thisProduct = this;
 
-      console.log('new Product:', thisProduct)
+      thisProduct.id = id;
+      thisProduct.data = data;
+
+      thisProduct.renderInMenu();
+      thisProduct.initAccordion();
+    }
+
+    renderInMenu() {
+      const thisProduct = this;
+
+      const view = templates.menuProduct(thisProduct.data); // '<div>...</div>'
+      thisProduct.element = utils.createDOMFromHTML(view);
+
+      thisProduct.productsList = document.querySelector('.product-list');
+      thisProduct.productsList.appendChild(thisProduct.element);
+    }
+
+    initAccordion() {
+      const thisProduct = this;
+
+      thisProduct.element.querySelector('.product__header').addEventListener("click", function(event) {
+        event.preventDefault();
+
+        const activeProduct = document.querySelector('.product.active');
+        if (activeProduct && activeProduct !== thisProduct.element) {
+          activeProduct.classList.remove('active');
+        }
+
+        thisProduct.element.classList.toggle('active');
+      });
     }
   }
 
   const app = {
-      initData: function(){
-        const thisApp = this;
-        thisApp.data = dataSource;
-      },
-      initMenu(){
-        const thisApp = this;
-        for (let productData in thisApp.data.products) {
-          new Product(productData, thisApp.data.products[productData]);
-        }
-      },
+    initData: function () {
+      const thisApp = this;
+      thisApp.data = dataSource;
+    },
+    initMenu() {
+      const thisApp = this;
+      for (let productData in thisApp.data.products) {
+        new Product(productData, thisApp.data.products[productData]);
+      }
+    },
 
-    init: function(){
+    init: function () {
       const thisApp = this;
       console.log('*** App starting ***');
       console.log('thisApp:', thisApp);
@@ -83,12 +112,6 @@ const select = {
       thisApp.initMenu();
     },
   };
-initData: function(){
-  const thisApp = this;
 
-  thisApp.data = dataSource;
-}
   app.init();
-},
-
-
+}
