@@ -76,6 +76,7 @@
       this.formInputs = this.form.querySelectorAll(select.all.formInputs);
       this.cartButton = this.element.querySelector(select.menuProduct.cartButton);
       this.priceElem = this.element.querySelector(select.menuProduct.priceElem);
+      this.ProductimageWrapper = this.element.querySelector(select.menuProduct.imageWrapper);
     }
 
     initOrderForm() {
@@ -105,16 +106,29 @@
 
         for (let optionId in param.options) {
           const option = param.options[optionId];
+          const optionImage = this.ProductimageWrapper.querySelector(`.${paramId}-${optionId}`);
+          if (optionImage != null) {
+          optionImage.classList.remove(classNames.menuProduct.imageVisible);
+          }
           const pizzaClass = '.' + paramId + '-' + optionId;
           const variable = formData[paramId] && formData[paramId].includes(optionId);
+          console.log(optionId, option);
 
           if (variable) {
             if (!option.default) {
               price += option.price;
+              console.log(option.price, price);
             }
-          } else {
+            if(optionImage){
+              optionImage.classList.add(classNames.menuProduct.imageVisible);
+            }
+          } else{
             if (option.default) {
               price -= option.price;
+              console.log(option.price, price)
+              if(optionImage){
+              optionImage.classList.remove(classNames.menuProduct.imageVisible);
+            }
             }
           }
         }
