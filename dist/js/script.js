@@ -76,10 +76,7 @@
       this.formInputs = this.form.querySelectorAll(select.all.formInputs);
       this.cartButton = this.element.querySelector(select.menuProduct.cartButton);
       this.priceElem = this.element.querySelector(select.menuProduct.priceElem);
-<<<<<<< HEAD
       this.ProductimageWrapper = this.element.querySelector(select.menuProduct.imageWrapper);
-=======
->>>>>>> 0160b4ab6925ab43145c06ad8eadbe4df123fe3e
     }
 
     initOrderForm() {
@@ -109,13 +106,10 @@
 
         for (let optionId in param.options) {
           const option = param.options[optionId];
-<<<<<<< HEAD
           const optionImage = this.ProductimageWrapper.querySelector(`.${paramId}-${optionId}`);
           if (optionImage != null) {
           optionImage.classList.remove(classNames.menuProduct.imageVisible);
           }
-=======
->>>>>>> 0160b4ab6925ab43145c06ad8eadbe4df123fe3e
           const pizzaClass = '.' + paramId + '-' + optionId;
           const variable = formData[paramId] && formData[paramId].includes(optionId);
           console.log(optionId, option);
@@ -123,7 +117,6 @@
           if (variable) {
             if (!option.default) {
               price += option.price;
-<<<<<<< HEAD
               console.log(option.price, price);
             }
             if(optionImage){
@@ -136,12 +129,10 @@
               if(optionImage){
               optionImage.classList.remove(classNames.menuProduct.imageVisible);
             }
-=======
             }
           } else {
             if (option.default) {
               price -= option.price;
->>>>>>> 0160b4ab6925ab43145c06ad8eadbe4df123fe3e
             }
           }
         }
