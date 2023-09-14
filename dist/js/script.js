@@ -29,6 +29,7 @@ const select = {
         input: 'input[name="amount"]',
         linkDecrease: 'a[href="#less"]',
         linkIncrease: 'a[href="#more"]',
+
       },
     },
   };
@@ -54,29 +55,81 @@ const select = {
 class AmountWidget{
   constructor(element){
     const thisWidget = this;
+    thisWidget.getElements(element);
+    thisWidget.setValue(thisWidget.input.value);
 
-    console.log('AmountWidget:', thisWidget);
-    console.log('constructor arguments:', element);
+
+    thisWidget.initActions();
+
   }
-}
+  getElements(element){
+    const thisWidget = this;
+
+    thisWidget.element = element;
+    thisWidget.input = thisWidget.element.querySelector(select.widgets.amount.input);
+    thisWidget.linkDecrease = thisWidget.element.querySelector(select.widgets.amount.linkDecrease);
+    thisWidget.linkIncrease = thisWidget.element.querySelector(select.widgets.amount.linkIncrease);
+    thisWidget.defaultMin = (settings.amountWidget.defaultMin);
+    thisWidget.defaultMax = (settings.amountWidget.defaultMax);
+  }
+
+  setValue(value){
+    const thisWidget = this;
+     let newValue = parseInt(value);
+
+    if( thisWidget.value !== newValue && !isNaN(newValue)) {
+      if (newValue <= thisWidget.defaultMin){
+        newValue =  thisWidget.defaultMin;
+
+      } if(newValue >= thisWidget.defaultMax){
+        newValue = thisWidget.defaultMax;
+      }
+      thisWidget.value = newValue;
+    }
+      thisWidget.announce();
+      thisWidget.input.value = thisWidget.value;
+
+  }
+  initActions(){
+    const thisWidget = this;
+    thisWidget.input.addEventListener('change', function(event) {
+      event.preventDefault();
+      thisWidget.setValue(thisWidget.input.value);
+    });
+      thisWidget.linkDecrease.addEventListener('click', function(value){
+        value.preventDefault();
+        thisWidget.setValue(thisWidget.value - 1);
+
+        });
+        thisWidget.linkIncrease.addEventListener('click', function(value){
+          value.preventDefault();
+          thisWidget.setValue(thisWidget.value + 1);
+
+          });
+  }
+  announce(){
+    const thisWidget = this;
+
+    const event = new Event('updated');
+    thisWidget.element.dispatchEvent(event);
+  }
+  }
+
+
   class Product{
     constructor(id, data){
       const thisProduct = this;
+
       this.id = id;
       this.data = data;
+
       thisProduct.renderInMenu();
       thisProduct.getElements();
       thisProduct.initAccordion();
       thisProduct.initOrderForm();
-      thisProduct.processOrder();
       thisProduct.initAmountWidget();
-    }
-    renderInMenu(){
-      const thisProduct = this;
-      const generatedHTML = templates.menuProduct(thisProduct.data);
-      thisProduct.element = utils.createDOMFromHTML(generatedHTML);
-      const menuContainer = document.querySelector(select.containerOf.menu);
-      menuContainer.appendChild(thisProduct.element);
+      thisProduct.processOrder();
+
     }
     getElements(){
       const thisProduct = this;
@@ -88,18 +141,26 @@ class AmountWidget{
       thisProduct.imageWrapper = thisProduct.element.querySelector(select.menuProduct.imageWrapper);
       thisProduct.amountWidgetElem = thisProduct.element.querySelector(select.menuProduct.amountWidget);
     }
-
+    renderInMenu(){
+      const thisProduct = this;
+      const generatedHTML = templates.menuProduct(thisProduct.data);
+      thisProduct.element = utils.createDOMFromHTML(generatedHTML);
+      const menuContainer = document.querySelector(select.containerOf.menu);
+      menuContainer.appendChild(thisProduct.element);
+    }
     initAccordion(){
       const thisProduct = this;
+
       thisProduct.accordionTrigger.addEventListener('click', function(event) {
         event.preventDefault();
         const activeProduct = document.querySelector(select.all.menuProductsActive);
-       if (activeProduct !== null && activeProduct != thisProduct.element ) {
+         if (activeProduct !== null && activeProduct != thisProduct.element ) {
           activeProduct.classList.remove(classNames.menuProduct.wrapperActive);
         }
         thisProduct.element.classList.toggle(classNames.menuProduct.wrapperActive);
       });
     }
+
     initOrderForm(){
       const thisProduct = this;
       thisProduct.form.addEventListener('submit', function(event){
@@ -117,6 +178,16 @@ class AmountWidget{
         thisProduct.processOrder();
       });
     }
+    initAmountWidget() {
+      const thisProduct = this;
+      thisProduct.amountWidget = new AmountWidget(thisProduct.amountWidgetElem);
+      this.amountWidgetElem.addEventListener('updated', event => {
+        event.preventDefault();
+       // console.log(thisProduct.amountWidget.value);
+        this.processOrder();
+
+      });
+    }
     processOrder() {
       const thisProduct = this;
       const formData = utils.serializeFormToObject(thisProduct.form);
@@ -131,31 +202,28 @@ for(let optionId in param.options) {
   optionImage.classList.remove(classNames.menuProduct.imageVisible);
   }
   let optionSelected = formData[paramId] && formData[paramId].includes(optionId);
-   if(optionSelected) {
+
+    if(optionSelected) {
       if(!option.default){
       price += option.price;
-      console.log(option.price, price)
       }
     if(optionImage){
       optionImage.classList.add(classNames.menuProduct.imageVisible);
     }
-     } else if (option.default) {
+  } else if (option.default) {
       price -= option.price;
-      console.log(option.price, price)
       if (optionImage) {
         optionImage.classList.remove(classNames.menuProduct.imageVisible);
       }
     }
   }
+
 }
+      price *= thisProduct.amountWidget.value;
       thisProduct.priceElem.innerHTML = price;
     }
 
-    initAmountWidget() {
-      const thisProduct = this;
 
-      thisProduct.amountWidget = new AmountWidget(thisProduct.amountWidgetElem);
-      }
   }
   const app = {
       initData: function(){
