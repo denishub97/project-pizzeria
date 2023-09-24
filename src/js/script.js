@@ -63,7 +63,7 @@
     amountWidget: {
       defaultValue: 1,
       defaultMin: 1,
-      defaultMax: 10,
+      defaultMax: 9,
     },
     cart: {
       defaultDeliveryFee: 20,
@@ -138,9 +138,11 @@ class AmountWidget{
   announce(){
     const thisWidget = this;
 
-    const event = new CustomEvent('updated',
+    const event = new CustomEvent('updated', {
+      bubbles: true,
+    });
     thisWidget.element.dispatchEvent(event);
-    }
+  }
   }
 
 
@@ -224,9 +226,8 @@ class AmountWidget{
       thisProduct.amountWidget = new AmountWidget(thisProduct.amountWidgetElem);
       this.amountWidgetElem.addEventListener('updated', event => {
         event.preventDefault();
-        
         this.processOrder();
-      
+
       });
     }
     processOrder() {
@@ -236,13 +237,13 @@ class AmountWidget{
       for(let paramId in thisProduct.data.params) {
         const param = thisProduct.data.params[paramId];
 
-        for(let optionId in param.options) {
-          const option = param.options[optionId]
-          const optionImage = thisProduct.imageWrapper.querySelector(`.${paramId}-${optionId}`);
-          if (optionImage != null) {
-            optionImage.classList.remove(classNames.menuProduct.imageVisible);
-          }
-      let optionSelected = formData[paramId] && formData[paramId].includes(optionId);
+for(let optionId in param.options) {
+  const option = param.options[optionId]
+  const optionImage = thisProduct.imageWrapper.querySelector(`.${paramId}-${optionId}`);
+  if (optionImage != null) {
+  optionImage.classList.remove(classNames.menuProduct.imageVisible);
+  }
+  let optionSelected = formData[paramId] && formData[paramId].includes(optionId);
 
     if(optionSelected) {
       if(!option.default){
@@ -252,7 +253,7 @@ class AmountWidget{
       optionImage.classList.add(classNames.menuProduct.imageVisible);
     }
   } else if (option.default) {
-      price -= option.price;
+     price -= option.price;
       if (optionImage) {
         optionImage.classList.remove(classNames.menuProduct.imageVisible);
       }
@@ -267,27 +268,30 @@ class AmountWidget{
       thisProduct.priceElem.innerHTML = price;
     }
 
-  
     prepareCartProductParams() {
       const thisProduct = this;
 
       const formData = utils.serializeFormToObject(thisProduct.form);
       const params = {};
 
+      // for very category (param)
       for(let paramId in thisProduct.data.params) {
         const param = thisProduct.data.params[paramId];
 
+        // create category param in params const eg. params = { ingredients: { name: 'Ingredients', options: {}}}
         params[paramId] = {
           label: param.label,
           options: {}
         }
 
+        // for every option in this category
         for(let optionId in param.options) {
           const option = param.options[optionId];
           const optionSelected = formData[paramId] && formData[paramId].includes(optionId);
 
           if(optionSelected) {
             params[paramId].options[optionId] = option.label;
+            // option is selected!
           }
         }
       }
@@ -296,6 +300,7 @@ class AmountWidget{
     }
 
      preparateCartProduct(){
+      //const thisProduct = this;
       const productSummary = {
         id: this.id,
         name: this.data.name,
@@ -334,7 +339,7 @@ class AmountWidget{
         wrapper: element,
         toogleTrigger: element.querySelector(select.cart.toggleTrigger),
         productList: element.querySelector(select.cart.productList),
-        deliveryFree: element.querySelector(select.cart.deliveryFee),
+        deliveryFee: element.querySelector(select.cart.deliveryFee),
         subtotalPrice: element.querySelector(select.cart.subtotalPrice),
         totalPrice: element.querySelectorAll(select.cart.totalPrice),
         totalNumber: element.querySelector(select.cart.totalNumber)
@@ -350,6 +355,9 @@ class AmountWidget{
       });
       thisCart.dom.productList.addEventListener('updated', () =>{
         thisCart.update();
+      });
+        thisCart.dom.productList.addEventListener('remove', event =>{
+        thisCart.remove(event.detail.cartProduct);
       });
      }
 
@@ -386,6 +394,14 @@ class AmountWidget{
         singleTotalPrice.innerHTML = this.totalPrice;
       }
     }
+
+    remove(productToRemove) {
+      productToRemove.dom.wrapper.remove();
+      const indexToRemove = this.products.indexOf(productToRemove);
+      this.products.splice(indexToRemove, 1);
+      this.update();
+    }
+
   }
 
   class CartProduct {
@@ -409,6 +425,7 @@ class AmountWidget{
         amountWidget: element.querySelector(select.cartProduct.amountWidget),
         price: element.querySelector(select.cartProduct.price),
         edit: element.querySelector(select.cartProduct.edit),
+        remove: element.querySelector(select.cartProduct.remove),
       };
     }
 
@@ -430,11 +447,27 @@ class AmountWidget{
       this.dom.edit.addEventListener('click', event => {
         event.preventDefault();
       });
+
+      this.dom.remove.addEventListener('click', event => {
+        event.preventDefault();
+
+        console.log('removed');
+        this.remove();
+      });
+    }
+
+    remove() {
+      const event = new CustomEvent('remove', {
+        bubbles: true,
+        detail: {
+          cartProduct: this,
+        },
+      });
+      this.dom.wrapper.dispatchEvent(event);
     }
 
   }
-  
-
+  //Methods
   const app = {
       initData: function(){
         const thisApp = this;
