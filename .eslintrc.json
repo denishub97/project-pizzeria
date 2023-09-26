@@ -17,6 +17,8 @@
         ]
     },
     "globals": {
-      "Handlebars": false
+      "Handlebars": false,
+      "utils": false,
+      "dataSource": false
     }
 }
