@@ -63,7 +63,7 @@
     amountWidget: {
       defaultValue: 1,
       defaultMin: 1,
-      defaultMax: 9,
+      defaultMax: 10,
     },
     cart: {
       defaultDeliveryFee: 20,
