@@ -18,7 +18,6 @@ class Home{
         thisHome.dom.orderButton = thisHome.dom.wrapper.querySelector(select.home.orderButton);
         thisHome.dom.bookButton = thisHome.dom.wrapper.querySelector(select.home.bookButton);
     }
-    
 }
 
 export default Home;
